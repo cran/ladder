@@ -1,0 +1,85 @@
+#' @include generics.R
+#' @details
+#' A data.frame object is added as a table with the column names in bold as the first row.
+#' For other formatting use the `flextable` package and [add_to_slides.flextable].
+#'
+#' @rdname add_to_slides
+#' @export
+#'
+#' @examplesIf interactive()
+#' ## Add a data.frame
+#' s <- choose_slides()
+#' obj <- iris[1:5, ]
+#' add_to_slides(obj, s, on = 1)
+add_to_slides.data.frame <- function(object,
+                                     presentation_id,
+                                     on = NULL,
+                                     object_id = new_id("table"),
+                                     overwrite = FALSE,
+                                     digits = NULL,
+                                     ...) {
+  assert_string(object_id, min.chars = 5)
+  page_id <- on_slide_id(presentation_id, on)
+
+  reqs <- make_df_table(object, object_id, page_id, digits)
+
+  if (isTRUE(overwrite)) {
+    if (object_id %in% unlist(get_object_ids(presentation_id))) {
+      reqs <- c(list(DeleteObjectRequest(objectId = object_id)), reqs)
+    }
+  }
+
+  reqs <- do.call(Request, reqs)
+  result <- presentations.batchUpdate(
+    presentationId = presentation_id,
+    BatchUpdatePresentationRequest = BatchUpdatePresentationRequest(
+      requests = reqs
+    )
+  )
+  slides_url(result$presentationId, page_id)
+  invisible(result)
+}
+
+make_df_table <- function(df, table_id, page_id, digits = NULL) {
+  ncols <- ncol(df)
+  nrows <- nrow(df) + 1
+  if (nrows < 1 || ncols < 1) stop("Must have at least 1 row and column.")
+  if (nrows > 20 || ncols > 20) {
+    stop("Large data.frame with >20 rows or columns is unlikely to fit on the slide.")
+  }
+
+  my_tab <- list()
+
+  add(my_tab) <- CreateTableRequest(
+    objectId = table_id,
+    elementProperties = PageElementProperties(pageObjectId = page_id),
+    rows = nrows,
+    columns = ncols
+  )
+
+
+  m <- as.matrix(format.data.frame(df, digits = digits))
+  m <- rbind(colnames(m), m)
+  # Add text to each cell
+  for (i in seq_len(nrows)) {
+    for (j in seq_len(ncols)) {
+      add(my_tab) <- InsertTextRequest(
+        objectId = table_id,
+        cellLocation = TableCellLocation(rowIndex = i - 1, columnIndex = j - 1),
+        text = m[i, j],
+        insertionIndex = 0
+      )
+      if (i == 1) {
+        add(my_tab) <- UpdateTextStyleRequest(
+          objectId = table_id,
+          cellLocation = TableCellLocation(rowIndex = i - 1, columnIndex = j - 1),
+          style = TextStyle(bold = TRUE),
+          textRange = Range(type = "ALL"),
+          fields = "bold"
+        )
+      }
+    }
+  }
+  my_tab_reqs <- lapply(my_tab, trim_nulls)
+  my_tab_reqs
+}
