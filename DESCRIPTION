@@ -1,13 +1,13 @@
 Package: ladder
 Title: Get on to the Slides
-Version: 0.0.1
+Version: 0.0.3
 Authors@R: 
     person("Isaac", "Gravestock", , "isaac.gravestock@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-0283-2065"))
 Description: Create tables from within R directly on Google Slides
     presentations.  Currently supports matrix, data.frame and 'flextable'
     objects.
-License: GPL (>= 3)
+License: MIT + file LICENSE
 URL: https://www.r-ladder.com
 BugReports: https://github.com/igrave/ladder/issues
 Imports: checkmate, cli, curl, flextable, gargle, httpuv, httr, rlang
@@ -26,9 +26,9 @@ Collate: 'api_choose.R' 'api_functions.R' 'api_gluestick.R'
         'get_slide_ids.R' 'helpers.R' 'images.R' 'matrix.R' 'package.R'
         'run_script.R' 'thumbnail.R' 'zzz.R'
 NeedsCompilation: no
-Packaged: 2025-04-29 16:45:51 UTC; Isaac
+Packaged: 2025-05-02 13:49:57 UTC; Isaac
 Author: Isaac Gravestock [aut, cre] (ORCID:
     <https://orcid.org/0000-0003-0283-2065>)
 Maintainer: Isaac Gravestock <isaac.gravestock@gmail.com>
 Repository: CRAN
-Date/Publication: 2025-05-02 09:30:01 UTC
+Date/Publication: 2025-05-02 14:30:14 UTC
